@@ -1,270 +1,451 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>نظام حساب يومية العامل</title>
     <style>
+      :root {
+        --bg-1: #f5f7fa;
+        --bg-2: #c3cfe2;
+        --card-bg: #ffffff;
+        --muted: #7f8c8d;
+        --accent-green: #2ecc71;
+        --accent-orange: #f39c12;
+        --accent-red: #e74c3c;
+        --text: #333;
+        --max-width: 980px;
+        --gap: 16px;
+      }
+
+      /* Reset-ish */
+      * {
+        box-sizing: border-box;
+      }
+      html,
       body {
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        height: 100%;
+      }
+      body {
         margin: 0;
         padding: 20px;
-        color: #333;
-        min-height: 100vh;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, var(--bg-1) 0%, var(--bg-2) 100%);
+        color: var(--text);
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
       }
+
       .container {
-        max-width: 900px;
+        max-width: var(--max-width);
         margin: 0 auto;
-        background-color: #fff;
-        padding: 25px;
-        border-radius: 15px;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        background: var(--card-bg);
+        padding: 24px;
+        border-radius: 14px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
       }
+
       h1 {
-        color: #2c3e50;
+        margin: 0 0 18px 0;
         text-align: center;
-        margin-bottom: 30px;
-        padding-bottom: 15px;
+        color: #2c3e50;
+        font-size: 1.6rem;
+        padding-bottom: 12px;
         border-bottom: 2px solid #eee;
       }
+
       .balance-container {
         background: linear-gradient(to right, #16a085, #1abc9c);
-        color: white;
-        padding: 20px;
-        border-radius: 12px;
+        color: #fff;
+        padding: 16px;
+        border-radius: 10px;
         text-align: center;
-        margin-bottom: 25px;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        margin-bottom: 18px;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+      }
+      .balance-container div {
+        line-height: 1.2;
       }
       .balance {
-        font-size: 2.2em;
-        font-weight: bold;
-        margin: 10px 0;
+        font-size: 1.6rem;
+        font-weight: 700;
+        margin-top: 6px;
       }
+
+      .top-row {
+        display: flex;
+        gap: var(--gap);
+        align-items: stretch;
+        margin-bottom: 18px;
+      }
+
       .buttons-container {
         display: flex;
-        justify-content: center;
-        gap: 25px;
-        margin-bottom: 35px;
+        gap: 12px;
+        align-items: center;
+        justify-content: flex-start;
         flex-wrap: wrap;
       }
+
       .btn {
-        padding: 18px 35px;
-        font-size: 1.3em;
-        border: none;
+        padding: 12px 20px;
         border-radius: 10px;
+        border: none;
+        font-size: 1rem;
         cursor: pointer;
-        transition: all 0.3s;
-        min-width: 180px;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+        transition: transform 0.18s ease, box-shadow 0.18s ease,
+          opacity 0.12s ease;
       }
+      .btn:active {
+        transform: translateY(1px);
+      }
+      .btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
       .attendance {
         background: linear-gradient(to right, #27ae60, #2ecc71);
-        color: white;
+        color: #fff;
       }
       .overtime {
         background: linear-gradient(to right, #e67e22, #f39c12);
-        color: white;
+        color: #fff;
       }
       .delete {
         background: linear-gradient(to right, #e74c3c, #c0392b);
-        color: white;
-        padding: 12px 25px;
-        font-size: 1.1em;
+        color: #fff;
+        padding: 10px 16px;
+        font-size: 0.95rem;
       }
-      .btn:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+
+      /* Filters */
+      .filters {
+        margin-left: auto;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
       }
+      select {
+        padding: 10px 12px;
+        border-radius: 8px;
+        border: 1.5px solid #e6e6e6;
+        background: white;
+        font-size: 0.95rem;
+        min-width: 120px;
+      }
+
+      /* History area */
+      .history {
+        margin-top: 6px;
+      }
+      .history-header {
+        display: flex;
+        gap: 12px;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+        flex-wrap: wrap;
+      }
+      .history-header h2 {
+        margin: 0;
+        font-size: 1.1rem;
+        color: #2c3e50;
+      }
+
+      /* Table wrapper for horizontal scroll on smaller devices */
+      .table-wrap {
+        width: 100%;
+        overflow: auto;
+        border-radius: 8px;
+        border: 1px solid #f0f0f0;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 720px; /* allows horizontal scroll on small screens */
+      }
+      th,
+      td {
+        padding: 12px 14px;
+        text-align: center;
+        border-bottom: 1px solid #f0f0f0;
+        font-size: 0.95rem;
+      }
+      th {
+        background: #34495e;
+        color: #fff;
+        font-weight: 600;
+      }
+      tr:hover td {
+        background: #fbfbfb;
+      }
+
+      .no-records {
+        text-align: center;
+        padding: 20px;
+        color: var(--muted);
+      }
+
+      .delete-btn {
+        background: var(--accent-red);
+        color: #fff;
+        border: none;
+        padding: 8px 10px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.9rem;
+      }
+
+      /* Modals */
       .input-modal {
         display: none;
         position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.5);
-        z-index: 1000;
-        justify-content: center;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.45);
+        z-index: 9999;
         align-items: center;
+        justify-content: center;
+        padding: 20px;
       }
+      .input-modal.open {
+        display: flex;
+      }
+
       .modal-content {
-        background-color: #fff;
-        padding: 30px;
-        border-radius: 15px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-        width: 350px;
-        text-align: center;
+        width: 420px;
+        max-width: 95%;
+        background: #fff;
+        border-radius: 12px;
+        padding: 22px;
+        box-shadow: 0 18px 50px rgba(0, 0, 0, 0.18);
+        transform: translateY(-18px);
+        opacity: 0;
+        transition: transform 0.24s ease, opacity 0.24s ease;
       }
+      .input-modal.open .modal-content {
+        transform: none;
+        opacity: 1;
+      }
+
       .modal-title {
-        margin-top: 0;
+        margin: 0 0 12px 0;
+        font-size: 1.05rem;
         color: #2c3e50;
       }
       .amount-input {
         width: 100%;
-        padding: 15px;
-        font-size: 1.2em;
-        border: 2px solid #ddd;
+        padding: 12px;
+        font-size: 1.05rem;
         border-radius: 8px;
-        margin: 20px 0;
+        border: 1.5px solid #e6e6e6;
         text-align: center;
-        box-sizing: border-box;
-      }
-      .amount-input:focus {
-        border-color: #3498db;
-        outline: none;
       }
       .modal-buttons {
         display: flex;
-        justify-content: space-between;
-        gap: 15px;
+        gap: 10px;
+        margin-top: 12px;
       }
       .modal-btn {
-        padding: 12px 25px;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 1.1em;
         flex: 1;
+        padding: 10px 12px;
+        border-radius: 8px;
+        border: none;
+        font-size: 0.95rem;
       }
       .confirm-btn {
-        background-color: #2ecc71;
-        color: white;
+        background: var(--accent-green);
+        color: #fff;
       }
       .cancel-btn {
-        background-color: #e74c3c;
-        color: white;
+        background: var(--accent-red);
+        color: #fff;
       }
-      .filters {
-        display: flex;
-        justify-content: center;
-        gap: 15px;
-        margin-bottom: 25px;
-        flex-wrap: wrap;
-      }
-      select {
-        padding: 10px 15px;
-        border-radius: 8px;
-        border: 2px solid #ddd;
-        background-color: white;
-        font-size: 1em;
-      }
-      .history-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 15px;
-        flex-wrap: wrap;
-      }
-      .history {
-        margin-top: 30px;
-      }
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 20px;
-      }
-      th,
-      td {
-        padding: 15px;
-        text-align: center;
-        border-bottom: 1px solid #ddd;
-      }
-      th {
-        background-color: #34495e;
-        color: white;
-      }
-      tr:hover {
-        background-color: #f9f9f9;
-      }
-      .no-records {
-        text-align: center;
-        padding: 20px;
-        color: #7f8c8d;
-      }
-      .delete-btn {
-        background-color: #e74c3c;
-        color: white;
-        border: none;
-        padding: 8px 12px;
-        border-radius: 5px;
-        cursor: pointer;
-        transition: background-color 0.3s;
-      }
-      .delete-btn:hover {
-        background-color: #c0392b;
-      }
-      @media (max-width: 768px) {
-        .buttons-container {
+
+      /* Responsive cards for very small screens: convert table rows to cards */
+      @media (max-width: 700px) {
+        .top-row {
           flex-direction: column;
-          align-items: center;
+          gap: 12px;
         }
         .filters {
-          flex-direction: column;
-          align-items: center;
+          margin-left: 0;
+          justify-content: flex-start;
         }
-        .history-header {
-          flex-direction: column;
-          gap: 15px;
+        .buttons-container .btn {
+          min-width: 0;
+          width: 100%;
+          padding: 14px;
+          font-size: 1.05rem;
+          border-radius: 10px;
         }
+
+        /* transform table to card-like list */
+        table {
+          min-width: unset;
+          border: none;
+        }
+        thead {
+          display: none;
+        }
+        tbody {
+          display: block;
+        }
+        tr {
+          display: block;
+          background: #fff;
+          border: 1px solid #f0f0f0;
+          margin-bottom: 12px;
+          padding: 10px;
+          border-radius: 10px;
+          box-shadow: 0 6px 16px rgba(0, 0, 0, 0.03);
+        }
+        td {
+          display: flex;
+          justify-content: space-between;
+          padding: 8px 6px;
+          border-bottom: none;
+        }
+        td[data-label]::before {
+          content: attr(data-label);
+          display: block;
+          font-weight: 600;
+          color: #555;
+          margin-left: 8px;
+        }
+        .delete-btn {
+          align-self: center;
+        }
+        .balance {
+          font-size: 1.35rem;
+        }
+      }
+
+      /* smaller tweaks */
+      @media (max-width: 420px) {
+        .modal-content {
+          padding: 18px;
+        }
+        .modal-title {
+          font-size: 1rem;
+        }
+        th,
+        td {
+          padding: 10px 8px;
+          font-size: 0.92rem;
+        }
+        select {
+          min-width: 100px;
+        }
+      }
+
+      /* focus styles for accessibility */
+      button:focus,
+      select:focus,
+      input:focus {
+        outline: 3px solid rgba(52, 152, 219, 0.15);
+        outline-offset: 2px;
       }
     </style>
   </head>
+
   <body>
-    <div class="container">
+    <div class="container" role="main">
       <h1>نظام حساب يومية العامل</h1>
 
-      <div class="balance-container">
+      <div class="balance-container" aria-live="polite">
         <div>الرصيد الحالي</div>
         <div class="balance"><span id="totalBalance">0</span> جنيه</div>
       </div>
 
-      <div class="buttons-container">
-        <button class="btn attendance" onclick="showInputModal('حضور')">
-          حضور
-        </button>
-        <button class="btn overtime" onclick="showInputModal('سهر')">
-          سهر
-        </button>
-      </div>
-
-      <div class="filters">
-        <select id="yearFilter" onchange="filterRecords()">
-          <option value="">كل السنوات</option>
-        </select>
-        <select id="monthFilter" onchange="filterRecords()">
-          <option value="">كل الشهور</option>
-        </select>
-        <select id="dayFilter" onchange="filterRecords()">
-          <option value="">كل الأيام</option>
-        </select>
-      </div>
-
-      <div class="history">
-        <div class="history-header">
-          <h2>سجل العمليات</h2>
-          <button class="btn delete" onclick="showDeleteOptions()">
+      <div class="top-row">
+        <div
+          class="buttons-container"
+          role="toolbar"
+          aria-label="أزرار العمليات"
+        >
+          <button
+            class="btn attendance"
+            onclick="showInputModal('حضور')"
+            aria-label="تسجيل حضور"
+          >
+            حضور
+          </button>
+          <button
+            class="btn overtime"
+            onclick="showInputModal('سهر')"
+            aria-label="تسجيل سهر"
+          >
+            سهر
+          </button>
+          <button
+            class="btn delete"
+            onclick="showDeleteOptions()"
+            aria-label="فتح خيارات المسح"
+          >
             مسح السجل
           </button>
         </div>
-        <table id="recordsTable">
-          <thead>
-            <tr>
-              <th>التاريخ</th>
-              <th>نوع العملية</th>
-              <th>القيمة</th>
-              <th>الرصيد</th>
-              <th>إجراءات</th>
-            </tr>
-          </thead>
-          <tbody id="recordsBody"></tbody>
-        </table>
+
+        <div class="filters" aria-label="مرشحات التاريخ">
+          <select
+            id="yearFilter"
+            onchange="filterRecords()"
+            aria-label="فلتر السنة"
+          >
+            <option value="">كل السنوات</option>
+          </select>
+          <select
+            id="monthFilter"
+            onchange="filterRecords()"
+            aria-label="فلتر الشهر"
+          >
+            <option value="">كل الشهور</option>
+          </select>
+          <select
+            id="dayFilter"
+            onchange="filterRecords()"
+            aria-label="فلتر اليوم"
+          >
+            <option value="">كل الأيام</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="history" aria-labelledby="historyTitle">
+        <div class="history-header">
+          <h2 id="historyTitle">سجل العمليات</h2>
+        </div>
+
+        <div class="table-wrap" id="tableWrap">
+          <table id="recordsTable" role="table" aria-describedby="historyTitle">
+            <thead>
+              <tr>
+                <th scope="col">التاريخ</th>
+                <th scope="col">نوع العملية</th>
+                <th scope="col">القيمة</th>
+                <th scope="col">الرصيد</th>
+                <th scope="col">إجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="recordsBody"></tbody>
+          </table>
+        </div>
       </div>
     </div>
 
-    <!-- نافذة إدخال القيمة -->
-    <div class="input-modal" id="inputModal">
+    <!-- Input Modal -->
+    <div
+      class="input-modal"
+      id="inputModal"
+      role="dialog"
+      aria-modal="true"
+      aria-hidden="true"
+      aria-labelledby="modalTitle"
+    >
       <div class="modal-content">
         <h3 class="modal-title" id="modalTitle">إدخال القيمة</h3>
         <input
@@ -273,6 +454,8 @@
           id="amountInput"
           placeholder="أدخل القيمة بالجنيه"
           min="1"
+          inputmode="numeric"
+          aria-label="قيمة بالجنيه"
         />
         <div class="modal-buttons">
           <button class="modal-btn cancel-btn" onclick="hideInputModal()">
@@ -285,29 +468,36 @@
       </div>
     </div>
 
-    <!-- نافذة خيارات المسح -->
-    <div class="input-modal" id="deleteModal">
+    <!-- Delete Modal -->
+    <div
+      class="input-modal"
+      id="deleteModal"
+      role="dialog"
+      aria-modal="true"
+      aria-hidden="true"
+      aria-labelledby="deleteTitle"
+    >
       <div class="modal-content">
-        <h3 class="modal-title">خيارات مسح السجل</h3>
+        <h3 class="modal-title" id="deleteTitle">خيارات مسح السجل</h3>
         <div
           style="
             display: flex;
             flex-direction: column;
-            gap: 15px;
-            margin: 20px 0;
+            gap: 12px;
+            margin-top: 12px;
           "
         >
           <button
             class="modal-btn"
             onclick="deleteAllRecords()"
-            style="background-color: #e74c3c"
+            style="background: var(--accent-red); color: #fff"
           >
             مسح كل السجلات
           </button>
           <button
             class="modal-btn"
             onclick="deleteTodayRecords()"
-            style="background-color: #e67e22"
+            style="background: var(--accent-orange); color: #fff"
           >
             مسح سجلات اليوم
           </button>
@@ -319,10 +509,12 @@
     </div>
 
     <script>
+      // البيانات
       let records = JSON.parse(localStorage.getItem("workerRecords")) || [];
       let balance = parseInt(localStorage.getItem("workerBalance")) || 0;
       let currentAction = "";
 
+      // عناصر
       const totalBalanceElement = document.getElementById("totalBalance");
       const recordsBody = document.getElementById("recordsBody");
       const yearFilter = document.getElementById("yearFilter");
@@ -333,22 +525,33 @@
       const modalTitle = document.getElementById("modalTitle");
       const amountInput = document.getElementById("amountInput");
 
+      // تنسيق الأرقام
+      const nf = new Intl.NumberFormat("ar-EG");
+      function formatCurrency(n) {
+        return nf.format(n) + " جنيه";
+      }
+
+      // INIT
       document.addEventListener("DOMContentLoaded", function () {
         updateBalance();
         displayRecords();
         populateFilterOptions();
       });
 
+      // فتح المودال مع أنيميشن
       function showInputModal(action) {
         currentAction = action;
         modalTitle.textContent = `إدخال قيمة ${action}`;
         amountInput.value = "";
-        inputModal.style.display = "flex";
-        amountInput.focus();
+        inputModal.classList.add("open");
+        inputModal.setAttribute("aria-hidden", "false");
+        // التركيز
+        setTimeout(() => amountInput.focus(), 200);
       }
 
       function hideInputModal() {
-        inputModal.style.display = "none";
+        inputModal.classList.remove("open");
+        inputModal.setAttribute("aria-hidden", "true");
       }
 
       function showDeleteOptions() {
@@ -356,13 +559,16 @@
           alert("لا توجد سجلات للمسح");
           return;
         }
-        deleteModal.style.display = "flex";
+        deleteModal.classList.add("open");
+        deleteModal.setAttribute("aria-hidden", "false");
       }
 
       function hideDeleteModal() {
-        deleteModal.style.display = "none";
+        deleteModal.classList.remove("open");
+        deleteModal.setAttribute("aria-hidden", "true");
       }
 
+      // تأكيد إدخال القيمة
       function confirmAmount() {
         const amount = parseInt(amountInput.value);
         if (isNaN(amount) || amount <= 0) {
@@ -373,6 +579,7 @@
         hideInputModal();
       }
 
+      // إضافة سجل
       function addRecord(type, amount) {
         const now = new Date();
         const dateString = now.toLocaleDateString("ar-EG");
@@ -401,16 +608,20 @@
         displayRecords();
         populateFilterOptions();
 
-        alert(`تم تسجيل ${type} بنجاح! تم إضافة ${amount} جنيه إلى حسابك.`);
+        alert(
+          `تم تسجيل ${type} بنجاح! تم إضافة ${formatCurrency(
+            amount
+          )} إلى الحساب.`
+        );
       }
 
+      // حذف سجل محدد
       function deleteRecord(id) {
         if (!confirm("هل أنت متأكد من أنك تريد حذف هذا السجل؟")) return;
 
-        const recordIndex = records.findIndex((record) => record.id === id);
+        const recordIndex = records.findIndex((r) => r.id === id);
         if (recordIndex === -1) return;
 
-        balance -= records[recordIndex].amount;
         records.splice(recordIndex, 1);
         updateBalancesAfterDeletion();
 
@@ -426,15 +637,20 @@
 
       function updateBalancesAfterDeletion() {
         let runningBalance = 0;
-        for (let record of records) {
-          runningBalance += record.amount;
-          record.balance = runningBalance;
+        for (let r of records) {
+          runningBalance += r.amount;
+          r.balance = runningBalance;
         }
         balance = runningBalance;
       }
 
       function deleteAllRecords() {
-        if (!confirm("هل أنت متأكد من أنك تريد حذف كل السجلات؟")) return;
+        if (
+          !confirm(
+            "هل أنت متأكد من أنك تريد حذف كل السجلات؟ لا يمكن التراجع عن هذا الإجراء."
+          )
+        )
+          return;
         records = [];
         balance = 0;
         localStorage.setItem("workerRecords", JSON.stringify(records));
@@ -448,13 +664,11 @@
 
       function deleteTodayRecords() {
         const today = new Date();
-        const todayDay = today.getDate();
-        const todayMonth = today.getMonth() + 1;
-        const todayYear = today.getFullYear();
-
+        const d = today.getDate(),
+          m = today.getMonth() + 1,
+          y = today.getFullYear();
         const todayRecords = records.filter(
-          (r) =>
-            r.day === todayDay && r.month === todayMonth && r.year === todayYear
+          (r) => r.day === d && r.month === m && r.year === y
         );
         if (todayRecords.length === 0) {
           alert("لا توجد سجلات لليوم");
@@ -468,37 +682,31 @@
           return;
 
         records = records.filter(
-          (r) =>
-            !(
-              r.day === todayDay &&
-              r.month === todayMonth &&
-              r.year === todayYear
-            )
+          (r) => !(r.day === d && r.month === m && r.year === y)
         );
         updateBalancesAfterDeletion();
 
         localStorage.setItem("workerRecords", JSON.stringify(records));
         localStorage.setItem("workerBalance", balance.toString());
-
         updateBalance();
         displayRecords();
         populateFilterOptions();
         hideDeleteModal();
-
         alert("تم حذف سجلات اليوم بنجاح");
       }
 
       function updateBalance() {
-        totalBalanceElement.textContent = balance.toLocaleString();
+        totalBalanceElement.textContent = nf.format(balance);
       }
 
+      // عرض السجلات - نضيف data-label لكل خلية لتتحول لكروت في الموبايل
       function displayRecords() {
         recordsBody.innerHTML = "";
         const year = yearFilter.value;
         const month = monthFilter.value;
         const day = dayFilter.value;
 
-        const filteredRecords = records.filter((record) => {
+        const filtered = records.filter((record) => {
           return (
             (!year || record.year == year) &&
             (!month || record.month == month) &&
@@ -506,39 +714,65 @@
           );
         });
 
-        if (filteredRecords.length === 0) {
+        if (filtered.length === 0) {
           recordsBody.innerHTML =
             '<tr><td colspan="5" class="no-records">لا توجد سجلات</td></tr>';
           return;
         }
 
-        filteredRecords.forEach((record) => {
+        filtered.forEach((record) => {
           const row = document.createElement("tr");
-          row.innerHTML = `
-                    <td>${record.date} - ${record.time}</td>
-                    <td>${record.type}</td>
-                    <td>+${record.amount.toLocaleString()} جنيه</td>
-                    <td>${record.balance.toLocaleString()} جنيه</td>
-                    <td><button class="delete-btn" onclick="deleteRecord(${
-                      record.id
-                    })">حذف</button></td>
-                `;
+
+          const tdDate = document.createElement("td");
+          tdDate.setAttribute("data-label", "التاريخ");
+          tdDate.innerHTML = `${record.date} - ${record.time}`;
+
+          const tdType = document.createElement("td");
+          tdType.setAttribute("data-label", "نوع العملية");
+          tdType.textContent = record.type;
+
+          const tdAmount = document.createElement("td");
+          tdAmount.setAttribute("data-label", "القيمة");
+          tdAmount.textContent = `+${nf.format(record.amount)} جنيه`;
+
+          const tdBalance = document.createElement("td");
+          tdBalance.setAttribute("data-label", "الرصيد");
+          tdBalance.textContent = `${nf.format(record.balance)} جنيه`;
+
+          const tdActions = document.createElement("td");
+          tdActions.setAttribute("data-label", "إجراءات");
+          const delBtn = document.createElement("button");
+          delBtn.className = "delete-btn";
+          delBtn.textContent = "حذف";
+          delBtn.onclick = () => deleteRecord(record.id);
+          tdActions.appendChild(delBtn);
+
+          row.appendChild(tdDate);
+          row.appendChild(tdType);
+          row.appendChild(tdAmount);
+          row.appendChild(tdBalance);
+          row.appendChild(tdActions);
+
           recordsBody.appendChild(row);
         });
       }
 
       function populateFilterOptions() {
-        const years = [...new Set(records.map((record) => record.year))].sort(
+        // years
+        const years = [...new Set(records.map((r) => r.year))].sort(
           (a, b) => b - a
         );
+        const prevYear = yearFilter.value;
         yearFilter.innerHTML = '<option value="">كل السنوات</option>';
-        years.forEach((year) => {
-          const option = document.createElement("option");
-          option.value = year;
-          option.textContent = year;
-          yearFilter.appendChild(option);
+        years.forEach((y) => {
+          const opt = document.createElement("option");
+          opt.value = y;
+          opt.textContent = y;
+          if (String(y) === String(prevYear)) opt.selected = true;
+          yearFilter.appendChild(opt);
         });
 
+        // months (static list)
         const months = {
           1: "يناير",
           2: "فبراير",
@@ -553,23 +787,28 @@
           11: "نوفمبر",
           12: "ديسمبر",
         };
+        const prevMonth = monthFilter.value;
         monthFilter.innerHTML = '<option value="">كل الشهور</option>';
-        for (const [value, name] of Object.entries(months)) {
-          const option = document.createElement("option");
-          option.value = value;
-          option.textContent = name;
-          monthFilter.appendChild(option);
+        for (const [v, name] of Object.entries(months)) {
+          const opt = document.createElement("option");
+          opt.value = v;
+          opt.textContent = name;
+          if (String(v) === String(prevMonth)) opt.selected = true;
+          monthFilter.appendChild(opt);
         }
 
-        const days = [...new Set(records.map((record) => record.day))].sort(
+        // days
+        const days = [...new Set(records.map((r) => r.day))].sort(
           (a, b) => a - b
         );
+        const prevDay = dayFilter.value;
         dayFilter.innerHTML = '<option value="">كل الأيام</option>';
-        days.forEach((day) => {
-          const option = document.createElement("option");
-          option.value = day;
-          option.textContent = day;
-          dayFilter.appendChild(option);
+        days.forEach((d) => {
+          const opt = document.createElement("option");
+          opt.value = d;
+          opt.textContent = d;
+          if (String(d) === String(prevDay)) opt.selected = true;
+          dayFilter.appendChild(opt);
         });
       }
 
@@ -577,11 +816,19 @@
         displayRecords();
       }
 
-      window.addEventListener("click", function (event) {
-        if (event.target === inputModal) hideInputModal();
-        if (event.target === deleteModal) hideDeleteModal();
+      // إغلاق المودال بالضغط خارج المودال أو بالـ ESC
+      window.addEventListener("click", function (e) {
+        if (e.target === inputModal) hideInputModal();
+        if (e.target === deleteModal) hideDeleteModal();
+      });
+      window.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") {
+          hideInputModal();
+          hideDeleteModal();
+        }
       });
 
+      // Enter داخل حقل المبلغ
       amountInput.addEventListener("keypress", function (e) {
         if (e.key === "Enter") confirmAmount();
       });
